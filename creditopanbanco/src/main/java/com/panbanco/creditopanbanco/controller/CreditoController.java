@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class CreditoController {
 	public static final Logger logger = LoggerFactory.getLogger(CreditoController.class);
 
 	@PostMapping("/calcular")
-	public CreditoResponse retornaCredito(@RequestBody CreditoRequest creditoRequest) {
+	public ResponseEntity<CreditoResponse> retornaCredito(@RequestBody CreditoRequest creditoRequest) {
 		ResponseEntity<PessoaResponse[]> pessoas = null; 
 		Optional<PessoaResponse> pessoa = null;
 		CreditoResponse creditoResponse = null;
@@ -40,18 +41,19 @@ public class CreditoController {
 	        		.equals(c.Nome.toString()))
 	        		.findFirst(); 
 	        
-	        if (pessoa != null) {
-	        	creditoRequest.setIdade(pessoa.get().getIdade());
-	        	creditoRequest.setSalario(pessoa.get().getSalario());
+	        if (!pessoa.isPresent()) 
+	        	return new ResponseEntity<>(creditoResponse, HttpStatus.NOT_FOUND);
 	        	
-	        	CalculaCreditoService calculaCreditoService = new CalculaCreditoService(creditoRequest);
-	        	creditoResponse = calculaCreditoService.retornaValorCredito();
-	        }
+        	creditoRequest.setIdade(pessoa.get().getIdade());
+        	creditoRequest.setSalario(pessoa.get().getSalario());
+        	
+        	CalculaCreditoService calculaCreditoService = new CalculaCreditoService(creditoRequest);
+        	creditoResponse = calculaCreditoService.retornaValorCredito();
 		} catch (Exception be) {
 			logger.error("Erro ao Listar pessoas " + be.getMessage());
 			new Exception("Erro na rotina de Listar pessoas. " + be.getMessage());
 		}
 		
-		return creditoResponse;
+		return new ResponseEntity<>(creditoResponse, HttpStatus.OK);
 	}
 }
