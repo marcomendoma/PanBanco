@@ -20,7 +20,7 @@ import com.panbanco.creditopanbanco.domain.PessoaResponse;
 import com.panbanco.creditopanbanco.service.CalculaCreditoService;
 
 @RestController
-@CrossOrigin("${origem-permitida}")
+//@CrossOrigin("${origem-permitida}")
 @RequestMapping("/credito")
 public class CreditoController {
 	public static final Logger logger = LoggerFactory.getLogger(CreditoController.class);
